@@ -1,0 +1,15 @@
+{
+  "name": "@news-app/bff",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "express": "^5.0.0",
+    "ioredis": "^5.0.0",
+    "zod": "^3.0.0",
+    "@news-app/shared": "*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/ioredis": "^5.0.0"
+  }
+}
