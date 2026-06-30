@@ -1,0 +1,161 @@
+.container {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+/* ── Tape ─────────────────────────── */
+
+.tape {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+}
+
+.tapeInner {
+  display: inline-flex;
+  gap: 2rem;
+  width: max-content;
+  animation: scroll var(--tape-speed, 30s) linear infinite;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.container.paused .tapeInner {
+  animation-play-state: paused;
+}
+
+.tapeInner.reducedMotion {
+  animation: none;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Tape Items ────────────────────── */
+
+.tapeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.thumbnail {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.headline {
+  display: inline-block;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-link, #0066cc);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.5rem;
+  min-height: 44px;
+  line-height: 2.5;
+}
+
+.headline:hover {
+  text-decoration: underline;
+}
+
+.headline:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+/* ── Skeleton ──────────────────────── */
+
+.skeletonTrack {
+  display: flex;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.skeleton {
+  width: 250px;
+  height: 44px;
+  background: var(--color-skeleton, #e0e0e0);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ── States ────────────────────────── */
+
+.errorState {
+  padding: 1rem;
+  color: var(--color-error, #cc0000);
+  background: var(--color-error-bg, #fff5f5);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.errorState p {
+  margin: 0;
+}
+
+.retryButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-error, #cc0000);
+  background: transparent;
+  color: var(--color-error, #cc0000);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.retryButton:hover {
+  background: var(--color-error, #cc0000);
+  color: white;
+}
+
+.retryButton:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+.emptyState {
+  padding: 1rem;
+  color: var(--color-text-muted, #666);
+  font-style: italic;
+}

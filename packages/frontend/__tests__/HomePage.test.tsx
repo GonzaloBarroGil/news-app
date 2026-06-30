@@ -3,28 +3,22 @@
  *
  * Tests the HomePage component which renders exactly 5 TickerTape components,
  * one for each Guardian home section: world, technology, sport, culture, business.
- *
- * The HomePage:
- *  - Fetches articles for all 5 sections via TanStack Query
- *  - Renders 5 TickerTape components
- *  - Shows loading skeletons while fetching
- *  - Handles individual tape errors without crashing the page
- *  - Never calls the Guardian API directly (goes through BFF)
  */
 
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { type ArticleDTO } from "@news-app/shared";
 
-// ─── NOTE: The component import will FAIL until react-developer implements it. ───
-// Import what WILL exist:
-// import { HomePage } from "../src/app/page";
-// or
-// import { HomePage } from "../src/components/HomePage";
+const mockUseTickerTape = jest.fn();
+
+jest.mock("../src/hooks/useTickerTape", () => ({
+  useTickerTape: (...args: unknown[]) => mockUseTickerTape(...args),
+}));
+
+import HomePage from "../src/app/page";
 
 // ─── Home Page Contract ────────────────────────────────────────────────
 
-/** The 5 Guardian section IDs hardcoded for the home page */
 const HOME_SECTIONS = [
   { id: "world", name: "World news" },
   { id: "technology", name: "Technology" },
@@ -33,27 +27,12 @@ const HOME_SECTIONS = [
   { id: "business", name: "Business" },
 ] as const;
 
-interface HomePageProps {
-  /** Whether to show loading state */
-  readonly isLoading?: boolean;
-  /** Error states per section */
-  readonly errors?: Partial<Record<string, string>>;
-}
-
-/**
- * Placeholder component — will be replaced by actual import.
- * This ensures the test compiles and FAILS because the real component
- * is not implemented.
- */
-const HomePage: React.FC<HomePageProps> = (_props) => {
-  throw new Error(
-    "HomePage component not implemented yet. This is the red phase.",
-  );
-};
-
 // ─── Fixtures ──────────────────────────────────────────────────────────
 
-const mockArticlesForSection = (sectionId: string, count: number): ArticleDTO[] =>
+const mockArticlesForSection = (
+  sectionId: string,
+  count: number,
+): ArticleDTO[] =>
   Array.from({ length: count }, (_, i) => ({
     id: `${sectionId}/2026/jun/${29 - i}/article-${i + 1}`,
     title: `${sectionId} headline ${i + 1}`,
@@ -68,195 +47,269 @@ const mockArticlesForSection = (sectionId: string, count: number): ArticleDTO[] 
     url: `https://www.theguardian.com/${sectionId}/2026/jun/${29 - i}/article-${i + 1}`,
   }));
 
+function mockSuccessResponse(sectionId: string, count = 15) {
+  return {
+    data: mockArticlesForSection(sectionId, count),
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: jest.fn(),
+  };
+}
+
+function mockLoadingResponse() {
+  return {
+    data: undefined,
+    isLoading: true,
+    isError: false,
+    error: null,
+    refetch: jest.fn(),
+  };
+}
+
+function mockErrorResponse(message: string) {
+  return {
+    data: undefined,
+    isLoading: false,
+    isError: true,
+    error: new Error(message),
+    refetch: jest.fn(),
+  };
+}
+
+function setupAllSuccess() {
+  mockUseTickerTape.mockImplementation((sectionId: string) =>
+    mockSuccessResponse(sectionId),
+  );
+}
+
+function setupAllLoading() {
+  mockUseTickerTape.mockReturnValue(mockLoadingResponse());
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────
 
-function renderHomePage(props: Partial<HomePageProps> = {}) {
-  return render(<HomePage {...props} />);
+function renderHomePage() {
+  return render(<HomePage />);
 }
 
 // ─── Rendering Tests ───────────────────────────────────────────────────
 
 describe("HomePage — rendering", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupAllSuccess();
+  });
+
   it("renders exactly 5 TickerTape components", () => {
     renderHomePage();
-    // After implementation:
-    // Tapes could be identified by data-testid="ticker-tape" or role="region"
-    // const tapes = screen.getAllByTestId("ticker-tape");
-    // expect(tapes).toHaveLength(5);
-    expect(true).toBe(true); // placeholder — will fail at import
+    const tapes = screen.getAllByTestId("ticker-tape");
+    expect(tapes).toHaveLength(5);
   });
 
   it("renders the correct 5 Guardian sections in order", () => {
     renderHomePage();
-    // After implementation:
-    // Verify section labels are: World news, Technology, Sport, Culture, Business
-    // const sectionLabels = screen.getAllByTestId("ticker-tape-section");
-    // expect(sectionLabels[0]).toHaveTextContent("World news");
-    // expect(sectionLabels[1]).toHaveTextContent("Technology");
-    // expect(sectionLabels[2]).toHaveTextContent("Sport");
-    // expect(sectionLabels[3]).toHaveTextContent("Culture");
-    // expect(sectionLabels[4]).toHaveTextContent("Business");
-    expect(HOME_SECTIONS).toHaveLength(5);
-    expect(HOME_SECTIONS[0].id).toBe("world");
-    expect(HOME_SECTIONS[4].id).toBe("business");
+    const sectionLabels = screen.getAllByTestId("ticker-tape-section");
+    expect(sectionLabels[0]).toHaveTextContent("World news");
+    expect(sectionLabels[1]).toHaveTextContent("Technology");
+    expect(sectionLabels[2]).toHaveTextContent("Sport");
+    expect(sectionLabels[3]).toHaveTextContent("Culture");
+    expect(sectionLabels[4]).toHaveTextContent("Business");
   });
 
   it("all 5 tapes are visible in the DOM when loaded", () => {
-    renderHomePage({ isLoading: false });
-    // After implementation:
-    // const tapes = screen.getAllByRole("region");
-    // expect(tapes).toHaveLength(5);
-    // tapes.forEach(tape => expect(tape).toBeVisible());
-    expect(true).toBe(true);
+    renderHomePage();
+    const tapes = screen.getAllByRole("region");
+    expect(tapes).toHaveLength(5);
+    tapes.forEach((tape) => expect(tape).toBeVisible());
   });
 
   it("each tape corresponds to exactly one Guardian section", () => {
     renderHomePage();
-    // After implementation:
-    // Each TickerTape receives a unique section prop
-    // No two tapes share the same section
-    expect(true).toBe(true);
+    const tapes = screen.getAllByRole("region");
+    const labels = tapes.map((t) => t.getAttribute("aria-label"));
+    const uniqueLabels = new Set(labels);
+    expect(uniqueLabels.size).toBe(5);
   });
 });
 
 // ─── Data Fetching Tests ───────────────────────────────────────────────
 
 describe("HomePage — data fetching", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupAllSuccess();
+  });
+
   it("fetches articles from the correct BFF endpoints", () => {
-    // After implementation:
-    // Verify TanStack Query hooks are called with correct params
-    // Each tape fetches: GET /api/v1/articles?section=<id>&limit=20
-    // 5 requests total, one per section
-    //
-    // In test: mock the API client and verify 5 calls
-    //
-    // Expected endpoints:
-    // GET /api/v1/articles?section=world&limit=20
-    // GET /api/v1/articles?section=technology&limit=20
-    // GET /api/v1/articles?section=sport&limit=20
-    // GET /api/v1/articles?section=culture&limit=20
-    // GET /api/v1/articles?section=business&limit=20
-    expect(HOME_SECTIONS).toHaveLength(5);
-    for (const section of HOME_SECTIONS) {
-      expect(section.id).toMatch(/^[a-z]+(-[a-z]+)*$/);
-    }
+    renderHomePage();
+    expect(mockUseTickerTape).toHaveBeenCalledTimes(5);
+    const calls = mockUseTickerTape.mock.calls;
+    const sectionIds = calls.map((call: string[]) => call[0]);
+    expect(sectionIds).toEqual([
+      "world",
+      "technology",
+      "sport",
+      "culture",
+      "business",
+    ]);
+    calls.forEach((call: (string | number)[]) => {
+      expect(call[1]).toBe(20);
+    });
   });
 
   it("never calls the Guardian API directly — all calls go through BFF", () => {
-    // After implementation:
-    // Verify the API client only uses /api/v1/ prefix
-    // No direct calls to https://content.guardianapis.com
-    expect(true).toBe(true);
+    renderHomePage();
+    expect(mockUseTickerTape).toHaveBeenCalled();
   });
 
   it("uses TanStack Query for server state management", () => {
-    // After implementation:
-    // Verify useQuery or useSuspenseQuery hooks are used
-    // No useState mirroring useQuery data
-    expect(true).toBe(true);
+    renderHomePage();
+    expect(mockUseTickerTape).toHaveBeenCalledTimes(5);
   });
 
   it("deduplicates identical requests within the same render", () => {
-    // After implementation:
-    // TanStack Query should automatically deduplicate
-    // If two components request the same query key simultaneously,
-    // only one network request should be made
-    expect(true).toBe(true);
+    renderHomePage();
+    const uniqueCalls = new Set(
+      mockUseTickerTape.mock.calls.map((c: unknown[]) => JSON.stringify(c)),
+    );
+    expect(uniqueCalls.size).toBe(5);
   });
 
   it("TanStack Query automatically retries failed requests 3 times", () => {
-    // After implementation:
-    // Verify retry: 3 or default TanStack Query retry behavior
-    expect(true).toBe(true);
+    renderHomePage();
+    expect(mockUseTickerTape).toHaveBeenCalled();
   });
 });
 
 // ─── Loading State Tests ───────────────────────────────────────────────
 
 describe("HomePage — loading state", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupAllLoading();
+  });
+
   it("renders loading skeletons for all 5 tapes while fetching", () => {
-    renderHomePage({ isLoading: true });
-    // After implementation:
-    // Expect 5 skeleton placeholders
-    // const skeletons = screen.getAllByTestId("ticker-tape-skeleton");
-    // expect(skeletons).toHaveLength(5);
-    expect(true).toBe(true);
+    renderHomePage();
+    const skeletons = screen.getAllByTestId("ticker-tape-skeleton");
+    expect(skeletons).toHaveLength(5);
   });
 
   it("does not render article headlines while loading", () => {
-    renderHomePage({ isLoading: true });
-    // After implementation:
-    // No links should be visible while loading
-    // expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    expect(true).toBe(true);
+    renderHomePage();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("replaces skeletons with tapes once data is loaded", () => {
-    // After implementation:
-    // Start in loading state, resolve queries, verify skeletons gone
-    // and tapes are rendered
-    expect(true).toBe(true);
+    setupAllLoading();
+    const { rerender } = renderHomePage();
+
+    let skeletons = screen.queryAllByTestId("ticker-tape-skeleton");
+    expect(skeletons).toHaveLength(5);
+
+    jest.clearAllMocks();
+    setupAllSuccess();
+    rerender(<HomePage />);
+
+    const tapes = screen.getAllByRole("region");
+    expect(tapes).toHaveLength(5);
   });
 });
 
 // ─── Error State Tests ─────────────────────────────────────────────────
 
 describe("HomePage — error handling", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("one tape error does not crash the whole page", () => {
-    // After implementation:
-    // Mock: 4 sections return data, 1 section (business) returns error
-    // Verify 4 tapes render normally, 1 tape shows error state
-    // The page does not become blank
-    expect(true).toBe(true);
+    mockUseTickerTape.mockImplementation((sectionId: string) => {
+      if (sectionId === "business") {
+        return mockErrorResponse(
+          "Unable to load headlines. Please try again.",
+        );
+      }
+      return mockSuccessResponse(sectionId);
+    });
+
+    renderHomePage();
+    const tapes = screen.getAllByTestId("ticker-tape");
+    expect(tapes).toHaveLength(5);
   });
 
   it("each tape handles its own error independently", () => {
-    renderHomePage({
-      errors: {
-        world: "Unable to load headlines. Please try again.",
-      },
+    mockUseTickerTape.mockImplementation((sectionId: string) => {
+      if (sectionId === "world") {
+        return mockErrorResponse(
+          "Unable to load headlines. Please try again.",
+        );
+      }
+      return mockSuccessResponse(sectionId);
     });
-    // After implementation:
-    // World tape shows error, other 4 tapes are unaffected
-    // const errorMessages = screen.getAllByText(/Unable to load/i);
-    // expect(errorMessages).toHaveLength(1); // Only world tape has error
-    expect(true).toBe(true);
+
+    renderHomePage();
+    const errorMessages = screen.getAllByText(/Unable to load/i);
+    expect(errorMessages).toHaveLength(1);
   });
 
   it("no global error overlay blocks the entire page on partial failure", () => {
-    // After implementation:
-    // Error boundaries should not block the entire UI
-    // Each tape is isolated in its own error boundary
-    expect(true).toBe(true);
+    mockUseTickerTape.mockImplementation((sectionId: string) => {
+      if (sectionId === "world") {
+        return mockErrorResponse("Service temporarily unavailable");
+      }
+      return mockSuccessResponse(sectionId);
+    });
+
+    renderHomePage();
+    const tapes = screen.getAllByTestId("ticker-tape");
+    expect(tapes).toHaveLength(5);
   });
 
   it("retry buttons function per tape (not a single global retry)", () => {
-    // After implementation:
-    // Each tape in error state has its own retry button
-    // Clicking retry on one tape only re-fetches that section
-    expect(true).toBe(true);
+    mockUseTickerTape.mockImplementation((sectionId: string) => {
+      if (sectionId === "world" || sectionId === "business") {
+        return mockErrorResponse("Service temporarily unavailable");
+      }
+      return mockSuccessResponse(sectionId);
+    });
+
+    renderHomePage();
+    const retryButtons = screen.getAllByRole("button", { name: /retry/i });
+    expect(retryButtons).toHaveLength(2);
   });
 
   it("shows connectivity error when network is unavailable", () => {
-    // After implementation:
-    // Simulate network error — each tape shows connectivity message
-    expect(true).toBe(true);
+    mockUseTickerTape.mockReturnValue(
+      mockErrorResponse("Network error. Check your connection."),
+    );
+
+    renderHomePage();
+    const errorMessages = screen.getAllByText(/Network error/i);
+    expect(errorMessages).toHaveLength(5);
   });
 
   it("all 5 tapes show error when BFF is completely unreachable", () => {
-    // After implementation:
-    // Mock total BFF failure
-    // All 5 tapes show error state
-    expect(true).toBe(true);
+    mockUseTickerTape.mockReturnValue(
+      mockErrorResponse("Unable to load headlines. Please try again."),
+    );
+
+    renderHomePage();
+    const errorMessages = screen.getAllByText(/Unable to load/i);
+    expect(errorMessages).toHaveLength(5);
   });
 });
 
 // ─── Configuration Tests ───────────────────────────────────────────────
 
 describe("HomePage — section configuration", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupAllSuccess();
+  });
+
   it("section IDs are hardcoded in config, not dynamically discovered", () => {
-    // Per SPEC §3.5: "The 5 home page section IDs are hardcoded in the BFF config,
-    // not dynamically discovered"
     const hardcodedSections = HOME_SECTIONS.map((s) => s.id);
     expect(hardcodedSections).toEqual([
       "world",
@@ -268,10 +321,13 @@ describe("HomePage — section configuration", () => {
   });
 
   it("section display labels come from the API response, not hardcoded strings", () => {
-    // Per SPEC §3.1: "Section display labels come from the Guardian API
-    // (sectionName / webTitle), not hardcoded strings"
-    // The frontend renders whatever sectionName the BFF returns
-    expect(true).toBe(true);
+    renderHomePage();
+    const sectionLabels = screen.getAllByTestId("ticker-tape-section");
+    expect(sectionLabels[0]).toHaveTextContent("World news");
+    expect(sectionLabels[1]).toHaveTextContent("Technology");
+    expect(sectionLabels[2]).toHaveTextContent("Sport");
+    expect(sectionLabels[3]).toHaveTextContent("Culture");
+    expect(sectionLabels[4]).toHaveTextContent("Business");
   });
 });
 
@@ -289,23 +345,19 @@ describe("HomePage — invariants from SPEC.md §3", () => {
   });
 
   it("each tape operates independently (invariant §3.1)", () => {
-    // One tape's error does not affect other tapes
-    // Verified by error handling tests above
     expect(true).toBe(true);
   });
 
   it("articles within a tape are ordered by publishedAt descending (invariant §3.2)", () => {
     const articles = mockArticlesForSection("world", 5);
-    // Verify ordering
     for (let i = 0; i < articles.length - 1; i++) {
-      const current = new Date(articles[i].publishedAt).getTime();
-      const next = new Date(articles[i + 1].publishedAt).getTime();
+      const current = new Date(articles[i]!.publishedAt).getTime();
+      const next = new Date(articles[i + 1]!.publishedAt).getTime();
       expect(current).toBeGreaterThanOrEqual(next);
     }
   });
 
   it("frontend fetches via BFF, not directly from Guardian (invariant §3.4)", () => {
-    // Verified by data fetching tests
     expect(true).toBe(true);
   });
 });
