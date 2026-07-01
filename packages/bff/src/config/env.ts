@@ -8,6 +8,7 @@ const envSchema = z.object({
   CACHE_TTL_ARTICLES: z.coerce.number().positive().default(300),
   PORT: z.coerce.number().positive().default(3001),
   FRONTEND_ORIGIN: z.string().url().default("http://localhost:3000"),
+  MOCK_GUARDIAN_API: z.coerce.boolean().default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;
