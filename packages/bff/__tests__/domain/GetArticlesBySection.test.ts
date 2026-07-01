@@ -19,7 +19,7 @@ import type { ArticleDTO } from "@news-app/shared";
 // These imports target files that do not exist yet.
 // node-developer must create them in Phase 4 for tests to pass.
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 import { GetArticlesBySection } from "../../src/domain/GetArticlesBySection";
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -29,6 +29,7 @@ import type {
   CacheService,
   PaginatedResult,
   PaginationParams,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mockArticlesForSection,
 } from "../helpers/createTestApp";
 
@@ -56,8 +57,10 @@ function createMockPorts() {
 
 // ─── Fixtures ──────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const validSection = "world";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const validPagination: PaginationParams = { page: 1, limit: 20 };
 
 const makeArticle = (overrides: Partial<ArticleDTO> = {}): ArticleDTO => ({
@@ -74,7 +77,9 @@ const makeArticle = (overrides: Partial<ArticleDTO> = {}): ArticleDTO => ({
 // ─── Tests ─────────────────────────────────────────────────────────────
 
 describe("GetArticlesBySection", () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let articleRepo: jest.Mocked<ArticleRepository>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let cacheService: jest.Mocked<CacheService>;
 
   beforeEach(() => {

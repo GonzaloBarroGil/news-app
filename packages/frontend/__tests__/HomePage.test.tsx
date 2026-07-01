@@ -205,7 +205,7 @@ describe("HomePage — loading state", () => {
     setupAllLoading();
     const { rerender } = renderHomePage();
 
-    let skeletons = screen.queryAllByTestId("ticker-tape-skeleton");
+    const skeletons = screen.queryAllByTestId("ticker-tape-skeleton");
     expect(skeletons).toHaveLength(5);
 
     jest.clearAllMocks();

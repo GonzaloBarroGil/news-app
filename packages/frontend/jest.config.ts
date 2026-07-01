@@ -18,8 +18,7 @@ const config: Config = {
     "^.+\\.tsx?$": [
       "ts-jest",
       {
-        tsconfig: "<rootDir>/tsconfig.json",
-        jsx: "react-jsx",
+        tsconfig: "<rootDir>/tsconfig.test.json",
       },
     ],
   },

@@ -7,3 +7,6 @@ coverage/
 .env.*.local
 *.log
 .cache/
+*.tsbuildinfo
+cypress/videos/
+cypress/screenshots/

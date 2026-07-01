@@ -16,17 +16,19 @@
  * - ErrorResponse shape for all error codes
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import request from "supertest";
 
 // ═══ IMPORTS THAT WILL FAIL (RED PHASE) ══════════════════════════════════
 // These imports target files that do not exist yet.
 // node-developer must create them in Phase 4 for tests to pass.
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 import { createApp } from "../../src/app";
 
 // ══════════════════════════════════════════════════════════════════════════
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { mockArticlesForSection } from "../helpers/createTestApp";
 
 describe("GET /api/v1/articles", () => {

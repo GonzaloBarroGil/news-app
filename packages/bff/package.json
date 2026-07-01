@@ -2,6 +2,9 @@
   "name": "@news-app/bff",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "dev": "tsx src/index.ts"
+  },
   "dependencies": {
     "@news-app/shared": "*",
     "@types/cors": "^2.8.19",

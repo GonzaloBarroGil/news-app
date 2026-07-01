@@ -11,5 +11,6 @@ const cacheService = new RedisCacheAdapter();
 const app = createApp(articleRepo, cacheService);
 
 app.listen(env.PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`BFF listening on port ${env.PORT}`);
 });

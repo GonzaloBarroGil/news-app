@@ -5,19 +5,32 @@
     "packages/*"
   ],
   "scripts": {
-    "lint": "eslint packages/*/src --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit",
+    "dev": "concurrently -n bff,fe -c blue,green \"npm run dev:bff\" \"npm run dev:frontend\"",
+    "dev:bff": "npm run --workspace=packages/bff dev",
+    "dev:frontend": "npm run --workspace=packages/frontend dev",
+    "lint": "eslint packages/*/src packages/*/__tests__",
+    "typecheck": "tsc --build",
     "test": "jest --config packages/bff/jest.config.ts",
     "test:bff": "jest --config packages/bff/jest.config.ts",
-    "test:frontend": "jest --config packages/frontend/jest.config.ts"
+    "test:frontend": "jest --config packages/frontend/jest.config.ts",
+    "test:e2e": "cypress run",
+    "test:e2e:ci": "start-server-and-test dev:frontend http://localhost:3000 dev:bff http://localhost:3001 test:e2e"
   },
   "devDependencies": {
     "@jest/types": "^30.4.1",
     "@types/jest": "^30.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.62.1",
+    "concurrently": "^10.0.3",
+    "cypress": "^15.18.0",
+    "eslint": "^10.6.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "start-server-and-test": "^3.0.11",
     "ts-jest": "^29.4.11",
-    "typescript": "^5.5.0"
+    "tsx": "^4.22.4",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.62.1"
   },
   "engines": {
     "node": ">=22"
