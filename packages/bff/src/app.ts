@@ -1,10 +1,12 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import type { ArticleDTO } from "@news-app/shared";
 import type { ArticleRepository, PaginatedResult } from "./ports/ArticleRepository";
 import type { CacheService } from "./ports/CacheService";
 import { GetArticlesBySection } from "./domain/GetArticlesBySection";
+import { loadEnv } from "./config/env";
 
 function errorCodeFromMessage(message: string): string {
   const map: Record<string, string> = {
@@ -61,10 +63,20 @@ export function createApp(
   cacheService?: CacheService,
 ): Express {
   const app = express();
+  const env = loadEnv();
 
   app.use(helmet());
-  app.use(cors());
-  app.use(express.json());
+  app.use(cors({ origin: env.FRONTEND_ORIGIN }));
+  app.use(express.json({ limit: "1mb" }));
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 100,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { status: 429, message: "Too many requests", code: "RATE_LIMITED" },
+    }),
+  );
 
   app.get("/api/v1/articles", async (req: Request, res: Response, next: NextFunction) => {
     try {
