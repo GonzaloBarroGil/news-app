@@ -5,7 +5,7 @@
     "rootDir": "./src",
     "jsx": "react-jsx"
   },
-  "include": ["src"],
+  "include": ["src", "types"],
   "references": [
     { "path": "../shared" }
   ]

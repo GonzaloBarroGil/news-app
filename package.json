@@ -1,14 +1,22 @@
 {
   "name": "news-app",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "lint": "eslint packages/*/src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "test:bff": "jest --config packages/bff/jest.config.ts"
+    "test": "jest --config packages/bff/jest.config.ts",
+    "test:bff": "jest --config packages/bff/jest.config.ts",
+    "test:frontend": "jest --config packages/frontend/jest.config.ts"
   },
   "devDependencies": {
+    "@jest/types": "^30.4.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
+    "ts-jest": "^29.4.11",
     "typescript": "^5.5.0"
   },
   "engines": {
