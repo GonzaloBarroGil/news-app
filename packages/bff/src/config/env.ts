@@ -14,5 +14,15 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export function loadEnv(overrides?: Partial<Env>): Env {
-  return envSchema.parse({ ...process.env, ...overrides });
+  const parsed = envSchema.parse({ ...process.env, ...overrides });
+  const hasRealKey =
+    process.env.GUARDIAN_API_KEY !== undefined &&
+    process.env.GUARDIAN_API_KEY !== "";
+  const mockExplicitlySet = process.env.MOCK_GUARDIAN_API !== undefined;
+
+  return {
+    ...parsed,
+    MOCK_GUARDIAN_API:
+      mockExplicitlySet ? parsed.MOCK_GUARDIAN_API : !hasRealKey,
+  };
 }

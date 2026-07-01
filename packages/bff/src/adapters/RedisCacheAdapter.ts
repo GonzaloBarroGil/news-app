@@ -3,30 +3,44 @@ import type { CacheService } from "../ports/CacheService";
 import { loadEnv } from "../config/env";
 
 export class RedisCacheAdapter implements CacheService {
-  private readonly redis: Redis;
+  private readonly redis: Redis | null;
   private readonly ttl: number;
   private connected: boolean;
 
   constructor() {
     const env = loadEnv();
     this.ttl = env.CACHE_TTL_ARTICLES;
-    this.connected = true;
+    this.connected = false;
 
-    this.redis = new Redis(env.REDIS_URL, {
+    const redisUrl = env.REDIS_URL;
+    const isDefaultUrl = redisUrl === "redis://localhost:6379";
+    const isUpstash = redisUrl.startsWith("rediss://");
+    const isValidUrl = isUpstash || (!isDefaultUrl && redisUrl.length > 0);
+
+    if (!isValidUrl) {
+      this.redis = null;
+      return;
+    }
+
+    this.redis = new Redis(redisUrl, {
+      connectTimeout: 2000,
       maxRetriesPerRequest: 1,
       retryStrategy() {
         return null;
       },
-      lazyConnect: true,
     });
 
     this.redis.on("error", () => {
       this.connected = false;
     });
+
+    this.redis.on("connect", () => {
+      this.connected = true;
+    });
   }
 
   async get<T>(key: string): Promise<T | null> {
-    if (!this.connected) return null;
+    if (!this.redis || !this.connected) return null;
 
     try {
       const raw = await this.redis.get(key);
@@ -38,7 +52,7 @@ export class RedisCacheAdapter implements CacheService {
   }
 
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
-    if (!this.connected) return;
+    if (!this.redis || !this.connected) return;
 
     try {
       const effectiveTtl = ttlSeconds ?? this.ttl;
@@ -49,7 +63,7 @@ export class RedisCacheAdapter implements CacheService {
   }
 
   async del(key: string): Promise<void> {
-    if (!this.connected) return;
+    if (!this.redis) return;
 
     try {
       await this.redis.del(key);

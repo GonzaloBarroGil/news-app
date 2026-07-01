@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { GuardianApiAdapter } from "./adapters/GuardianApiAdapter";
 import { MockArticleRepository } from "./adapters/MockArticleRepository";
 import { RedisCacheAdapter } from "./adapters/RedisCacheAdapter";
